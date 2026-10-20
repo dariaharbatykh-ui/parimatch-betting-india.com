@@ -1,0 +1,14 @@
+# Cloudflare Workers со статическими файлами: весь сайт — папка public/ (собирается build.py).
+# Никогда не *.parimatch-betting-india.com/* — поддомен pbic. (партнёрские ссылки) должен остаться нетронутым.
+name = "parimatch-betting-india"
+compatibility_date = "2026-10-01"
+workers_dev = true
+# routes = [
+#   { pattern = "parimatch-betting-india.com/*", zone_name = "parimatch-betting-india.com" },
+#   { pattern = "www.parimatch-betting-india.com/*", zone_name = "parimatch-betting-india.com" },
+# ]
+
+[assets]
+directory = "public"
+not_found_handling = "404-page"
+html_handling = "auto-trailing-slash"
