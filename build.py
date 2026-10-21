@@ -861,7 +861,8 @@ def _page_html(slug, meta, body):
 
     # В lead допускается одна ссылка (на главную) в виде [анкор](/url)
     lead = f'<p class="lead">{lead_html(meta["lead"])}</p>' if meta.get("lead") else ""
-    hero = f'''<section class="hero{' hero-legal' if kind == 'legal' else ''}">
+    # Первый экран — вводная часть основного содержимого (<header> внутри <main>), h1 озаглавливает всю страницу
+    hero = f'''<header class="hero{' hero-legal' if kind == 'legal' else ''}">
   <div class="wrap">
     {crumbs}
     <div class="hero-grid{'' if hero_side else ' single'}">
@@ -873,7 +874,7 @@ def _page_html(slug, meta, body):
       {hero_side}
     </div>
   </div>
-</section>'''
+</header>'''
 
     toc = toc_from(body) if kind != "legal" else ""
     updated_label = "Last updated" if kind == "legal" else "Updated"
