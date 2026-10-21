@@ -5,6 +5,11 @@
   "scripts": {
     "build": "python3 build.py",
     "dev": "python3 build.py && node serve.mjs 8090",
-    "deploy": "python3 build.py && npx wrangler deploy"
+    "deploy": "python3 build.py && npx wrangler deploy",
+    "validate": "python3 build.py && html-validate \"public/**/*.html\"",
+    "og": "python3 tools/make_og.py"
+  },
+  "devDependencies": {
+    "html-validate": "^9.7.1"
   }
 }

@@ -274,7 +274,7 @@ def illus_html(kind):
                 f'{row("Proof of address", "On request")}{row("Selfie with ID", "On request")}</ul>'
                 f'<p class="ui-btn">Upload Document</p></div><p class="art-chip">Usually within 24 h</p>')
     if kind == "affiliate":
-        bars = "".join(f'<i style="--h:{h}%"></i>' for h in (34, 48, 41, 62, 58, 76, 88))
+        bars = "<i></i>" * 7
         return (f'<div class="ui-card"><p class="ui-title">Partner Dashboard</p><div class="ui-bars" aria-hidden="true">{bars}</div>'
                 f'<div class="ui-methods"><span>RevShare</span><span>CPA</span><span>Hybrid</span></div>'
                 f'<p class="ui-hint">Tracking links · marketing materials · monthly payouts</p></div>')
@@ -358,6 +358,32 @@ def hero_shot_html(slug, tag=""):
     return f'<figure class="hero-art2 lay-{lay}">{inner}{chip}{tag_html}</figure>'
 
 
+PUBLISHED_ISO = "2026-10-20"
+_MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September",
+           "October", "November", "December"]
+
+
+def modified_iso(path):
+    """Дата последнего изменения страницы: незакоммиченные правки → сегодня, иначе дата последнего коммита."""
+    import datetime
+    import subprocess
+    rel = str(path.relative_to(ROOT))
+    try:
+        dirty = subprocess.run(["git", "status", "--porcelain", "--", rel], cwd=ROOT, capture_output=True, text=True).stdout.strip()
+        if not dirty:
+            d = subprocess.run(["git", "log", "-1", "--format=%cs", "--", rel], cwd=ROOT, capture_output=True, text=True).stdout.strip()
+            if d:
+                return d
+    except OSError:
+        pass
+    return datetime.date.today().isoformat()
+
+
+def human_date(iso):
+    y, m, d = iso.split("-")
+    return f"{int(d)} {_MONTHS[int(m) - 1]} {y}"
+
+
 def asset_ver(name):
     """Короткий хэш файла для ?v= — после правки CSS/JS браузеры и Cloudflare берут новую версию."""
     return hashlib.md5((SRC / "assets" / name).read_bytes()).hexdigest()[:8]
@@ -430,7 +456,7 @@ def tc_html(fragment):
 def headings_tc(doc):
     doc = re.sub(r"(<(h[1-3])\b[^>]*>)(.*?)(</\2>)", lambda m: m.group(1) + tc_html(m.group(3)) + m.group(4), doc, flags=re.S)
     doc = re.sub(r'(<div class="big">)(.*?)(</div>)', lambda m: m.group(1) + tc_html(m.group(2)) + m.group(3), doc)
-    doc = re.sub(r'(<div class="cta-box"><p>)(.*?)(<small>)', lambda m: m.group(1) + tc_html(m.group(2)) + m.group(3), doc)
+    doc = re.sub(r'(<div class="cta-box"><p>)(.*?)( <span class="cta-sub">)', lambda m: m.group(1) + tc_html(m.group(2)) + m.group(3), doc)
     doc = re.sub(r'(<nav class="tabs".*?</nav>)', lambda m: re.sub(r'(<a href="#[^"]+">)(.*?)(</a>)', lambda a: a.group(1) + tc_html(a.group(2)) + a.group(3), m.group(1)), doc, flags=re.S)
     return doc
 
@@ -476,7 +502,7 @@ def game_img(name, prov):
             break
     else:
         return ""
-    alt = esc(f"{name} by {prov}") if prov and "game" not in prov.lower() else esc(name)
+    alt = esc(name)
     if ext == "jpg":
         w, h = jpeg_size(path)
     else:
@@ -536,12 +562,54 @@ def add_icons(body, headings=True):
 
     def _card(m):
         inner = m.group(2)
-        h3 = re.search(r"<h3>(.*?)</h3>", inner)
+        h3 = re.search(r"<h[34]>(.*?)</h[34]>", inner)
         kicker = re.search(r'<span class="kicker">(.*?)</span>', inner)
         name = icon_for((h3.group(1) if h3 else "") + " " + (kicker.group(1) if kicker else "")) or "star"
         return f'{m.group(1)}<span class="card-ico" aria-hidden="true">{icon(name)}</span>{inner}{m.group(3)}'
     body = re.sub(r'(<(?:div|a) class="card"[^>]*>)(.*?)(</(?:div|a)>)', _card, body, flags=re.S)
     return body
+
+
+def semantic_tables(body):
+    """Таблицы: первая строка с <th> → <thead> (scope="col"), остальные → <tbody>, первая ячейка строки —
+    <th scope="row">, у ячеек data-label (для таблиц от 3 колонок на телефоне они становятся карточками)."""
+    def cells(row):
+        return [(t, c, a) for t, a, c in re.findall(r"<(t[hd])\b([^>]*)>(.*?)</t[hd]>", row, re.S)]
+
+    def one(m):
+        attrs, inner = m.group(1), m.group(2)
+        rows = re.findall(r"<tr\b[^>]*>(.*?)</tr>", inner, re.S)
+        if not rows:
+            return m.group(0)
+        head = None
+        if all(t == "th" for t, _, _ in cells(rows[0])):
+            head, rows = [c for _, c, _ in cells(rows[0])], rows[1:]
+        ncol = len(head) if head else max(len(cells(r)) for r in rows)
+        cls = re.search(r'class="([^"]*)"', attrs)
+        classes = (cls.group(1).split() if cls else []) + (["stack"] if ncol >= 3 else [])
+        out = [f'<table{" class=" + chr(34) + " ".join(classes) + chr(34) if classes else ""}>']
+        if head:
+            out.append("<thead><tr>" + "".join(f'<th scope="col">{h}</th>' for h in head) + "</tr></thead>")
+        out.append("<tbody>")
+        for r in rows:
+            cs = cells(r)
+            tds = []
+            col = 0
+            for i, (_, c, a) in enumerate(cs):
+                span = a.strip()
+                m2 = re.search(r'colspan="(\d+)"', span)
+                n = int(m2.group(1)) if m2 else 1
+                label = " / ".join(strip_tags(h) for h in head[col:col + n]) if head else ""
+                if i == 0:
+                    tds.append(f'<th scope="row"{" " + span if span else ""}>{c}</th>')
+                else:
+                    dl = f' data-label="{esc(label)}"' if label else ""
+                    tds.append(f'<td{" " + span if span else ""}{dl}>{c}</td>')
+                col += n
+            out.append("<tr>" + "".join(tds) + "</tr>")
+        out.append("</tbody></table>")
+        return "".join(out)
+    return re.sub(r"<table\b([^>]*)>(.*?)</table>", one, body, flags=re.S)
 
 
 def expand(body):
@@ -556,7 +624,7 @@ def expand(body):
 
     def _box(m):
         head, sub, btn, link = (m.group(1).split("|") + ["", "", "", ""])[:4]
-        return (f'<div class="cta-box"><p>{esc(head)}<small>{esc(sub)}</small></p>'
+        return (f'<div class="cta-box"><p>{esc(head)} <span class="cta-sub">{esc(sub)}</span></p>'
                 f'{cta(btn, "", link or "reg")}</div>')
 
     def _games(m):
@@ -566,16 +634,17 @@ def expand(body):
             name, prov = (g.split("/") + [""])[:2]
             c1, c2 = GAME_COLORS[i % len(GAME_COLORS)]
             img = game_img(name, prov)
-            out.append(f'<div class="game"><div class="art{" has-img" if img else ""}" style="--g1:{c1};--g2:{c2}">'
-                       f'{img}<b>{esc(name)}</b></div><span>{esc(prov)}</span></div>')
+            art = (f'<div class="art has-img">{img}</div>' if img else
+                   f'<div class="art g{i % len(GAME_COLORS) + 1}"><b>{esc(name)}</b></div>')
+            out.append(f'<div class="game">{art}<span>{esc(prov)}</span></div>')
         return '<div class="games">' + "".join(out) + "</div>"
 
     body = re.sub(r"\{\{cta:([^}]+)\}\}", _cta, body)
     body = re.sub(r"\{\{ctabox:([^}]+)\}\}", _box, body)
     body = re.sub(r"\{\{games:([^}]+)\}\}", _games, body)
     body = re.sub(r"\{\{icon:([a-z]+)\}\}", lambda m: icon(m.group(1)), body)
-    body = body.replace("{{updated}}", UPDATED_TXT)
-    return body
+    body = body.replace("{{updated}}", f'<time datetime="{UPDATED_ISO}">{UPDATED_TXT}</time>')
+    return semantic_tables(body)
 
 
 def short_label(text):
@@ -616,11 +685,12 @@ def url_of(slug):
 
 LOGO = (f'<a class="logo" href="/" aria-label="{SITE_NAME} home">'
         f'<span class="logo-mark" aria-hidden="true">PM</span>'
-        f'<span class="logo-txt">Parimatch<small>Betting India</small></span></a>')
+        f'<span class="logo-txt">Parimatch <span class="logo-sub">Betting India</span></span></a>')
 
 
 def nav_html(current, mobile=False):
     items = []
+    sfx = "-m" if mobile else ""
     for entry in NAV:
         href, label, ico = entry[:3]
         if len(entry) == 4:
@@ -630,10 +700,11 @@ def nav_html(current, mobile=False):
             subs = "".join(
                 f'<li><a href="{h}"{cur_attr if h == current else ""}>{icon(i)}<span>{t}</span></a></li>'
                 for h, t, i in sub)
+            sid = f"sub-{href.lstrip('#')}{sfx}"
             items.append(
                 f'<li class="has-sub{" active" if active else ""}">'
-                f'<a href="#" class="sub-toggle" aria-haspopup="true" aria-expanded="false">{icon(ico)}<span>{label}</span>{icon("chev")}</a>'
-                f'<ul class="sub">{subs}</ul></li>')
+                f'<button type="button" class="sub-toggle" aria-expanded="false" aria-controls="{sid}">{icon(ico)}<span>{label}</span>{icon("chev")}</button>'
+                f'<ul class="sub" id="{sid}">{subs}</ul></li>')
         else:
             cur = ' aria-current="page"' if href == current else ""
             items.append(f'<li><a href="{href}"{cur}>{icon(ico)}<span>{label}</span></a></li>')
@@ -684,7 +755,7 @@ def footer():
       <div><h2>Information</h2><ul>{links(FOOTER_INFO)}</ul></div>
       <div><h2>Rules &amp; Policies</h2><ul>{links(FOOTER_LEGAL)}</ul></div>
     </div>
-    <ul class="pay-strip" aria-label="Payment methods">{pays}</ul>
+    <ul class="pay-strip">{pays}</ul>
     <div class="disclaimer">
       <p>{SITE_NAME} is an independent information site about Parimatch. The site does not accept bets, run games or process payments. Some links are affiliate links: if you register through them, the site may earn a commission at no extra cost to you.</p>
       <p>For users aged 18 and over only. Online betting rules differ between Indian states: check the rules where you live before you play. Gambling can be addictive. Set limits and stop if the game stops being fun.</p>
@@ -699,7 +770,7 @@ def sticky_cta(slug):
         return ""
     first = cta("Download App", "", "app") if slug == "app" else cta("Sign Up")
     second = cta("Sign Up", "ghost") if slug == "app" else cta("Download App", "ghost", "app")
-    return f'<div class="sticky-cta" role="region" aria-label="Quick actions">{first}{second}</div>'
+    return f'<aside class="sticky-cta" aria-label="Quick actions">{first}{second}</aside>'
 
 
 def crumbs_for(slug, label):
@@ -715,8 +786,16 @@ def crumbs_for(slug, label):
     return trail
 
 
+def og_image_path(slug):
+    name = "default" if slug == "404" else slug.replace("/", "-")
+    path = SRC / "assets" / "img" / "og" / f"{name}.jpg"
+    return f"/assets/img/og/{name if path.exists() else 'default'}.jpg"
+
+
 def page_html(slug, meta, body):
-    return headings_tc(_page_html(slug, meta, body))
+    doc = headings_tc(_page_html(slug, meta, body))
+    # без пробелов в конце строк и без пустых строк из пробелов
+    return "\n".join(line.rstrip() for line in doc.split("\n"))
 
 
 def _page_html(slug, meta, body):
@@ -749,17 +828,19 @@ def _page_html(slug, meta, body):
         graph.append({"@type": "Organization", "@id": SITE + "/#org", "name": SITE_NAME,
                       "url": SITE + "/", "email": "contact@parimatch-betting-india.com"})
 
-    graph.append({
-        "@type": "WebPage" if kind == "legal" else "Article",
-        "headline": meta["h1"],
-        "description": meta["description"],
-        "url": canonical,
-        "inLanguage": "en-IN",
-        "dateModified": UPDATED_ISO,
-        "datePublished": UPDATED_ISO,
+    mod = meta.get("modified", UPDATED_ISO)
+    ptype = {"index": "WebPage", "contacts": "ContactPage", "about": "AboutPage"}.get(
+        slug, "WebPage" if kind == "legal" or slug == "404" else "Article")
+    node = {"@type": ptype, "url": canonical, "inLanguage": "en-IN", "description": meta["description"],
+            "datePublished": PUBLISHED_ISO, "dateModified": mod,
+            "image": SITE + og_image_path(slug)}
+    node["headline" if ptype == "Article" else "name"] = meta["h1"]
+    graph.append({**node,
         "author": {"@type": "Organization", "name": SITE_NAME, "url": SITE + "/"},
         "publisher": {"@type": "Organization", "name": SITE_NAME, "url": SITE + "/"},
     })
+    if ptype != "Article":
+        graph[-1].pop("author", None)
     fs = faq_schema(body)
     if fs:
         graph.append(fs)
@@ -783,7 +864,7 @@ def _page_html(slug, meta, body):
     hero = f'''<section class="hero{' hero-legal' if kind == 'legal' else ''}">
   <div class="wrap">
     {crumbs}
-    <div class="hero-grid"{' style="grid-template-columns:1fr"' if not hero_side else ''}>
+    <div class="hero-grid{'' if hero_side else ' single'}">
       <div>
         <h1>{esc(meta["h1"])}</h1>
         {lead}
@@ -796,13 +877,17 @@ def _page_html(slug, meta, body):
 
     toc = toc_from(body) if kind != "legal" else ""
     updated_label = "Last updated" if kind == "legal" else "Updated"
-    meta_line = (f'<div class="meta-line updated"><span>{updated_label}: <time datetime="{UPDATED_ISO}">{UPDATED_TXT}</time></span></div>'
+    meta_line = (f'<p class="meta-line updated">{updated_label}: <time datetime="{mod}">{human_date(mod)}</time></p>'
                  if slug != "404" else "")
 
     robots = meta.get("robots", "index, follow, max-image-preview:large")
+    head_links = ("" if slug == "404" else
+                  f'<link rel="canonical" href="{canonical}">\n'
+                  f'<link rel="alternate" hreflang="en-IN" href="{canonical}">\n'
+                  f'<link rel="alternate" hreflang="x-default" href="{canonical}">')
     og_type = "website" if slug == "index" else "article"
 
-    return f'''<!doctype html>
+    return f'''<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -810,16 +895,19 @@ def _page_html(slug, meta, body):
 <title>{esc(meta["title"])}</title>
 <meta name="description" content="{esc(meta["description"])}">
 <meta name="robots" content="{robots}">
-<link rel="canonical" href="{canonical}">
-<link rel="alternate" hreflang="en-IN" href="{canonical}">
-<link rel="alternate" hreflang="x-default" href="{canonical}">
+{head_links}
 <meta property="og:locale" content="en_IN">
 <meta property="og:type" content="{og_type}">
 <meta property="og:site_name" content="{SITE_NAME}">
 <meta property="og:title" content="{esc(meta["title"])}">
 <meta property="og:description" content="{esc(meta["description"])}">
 <meta property="og:url" content="{canonical}">
-<meta name="twitter:card" content="summary">
+<meta property="og:image" content="{SITE}{og_image_path(slug)}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="{esc(meta["h1"])}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="{SITE}{og_image_path(slug)}">
 <meta name="theme-color" content="#0b0b0b">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="preload" href="/assets/fonts/manrope-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin>
@@ -833,9 +921,9 @@ def _page_html(slug, meta, body):
 {hero}
 {toc}
 <div class="page">
-  <article class="content{' legal' if kind == 'legal' else ''}">
+  <div class="content{' legal' if kind == 'legal' else ''}">
 {body}
-  </article>
+  </div>
   {meta_line}
 </div>
 </main>
@@ -848,11 +936,12 @@ def _page_html(slug, meta, body):
 
 
 def parse(path):
-    raw = path.read_text(encoding="utf-8").replace("{{updated}}", UPDATED_TXT)
+    raw = path.read_text(encoding="utf-8")
     m = re.match(r"\s*<!--(\{.*?\})-->\s*(.*)", raw, re.S)
     if not m:
         sys.exit(f"{path}: нет JSON-шапки")
-    return json.loads(m.group(1)), m.group(2)
+    # в метаданных дата — обычный текст, в теле страницы {{updated}} станет <time> (см. expand)
+    return json.loads(m.group(1).replace("{{updated}}", UPDATED_TXT)), m.group(2)
 
 
 # Проверки текста: официальный сайт не упоминаем, бренд — в третьем лице без местоимений.
@@ -920,9 +1009,23 @@ def check_page(slug):
     print("OK")
 
 
+def render_page(slug, out):
+    """python3 build.py --render <slug> <file>: собрать одну страницу в файл (для html-validate), public/ не трогается."""
+    p = SRC / "pages" / f"{slug}.html"
+    meta, body = parse(p)
+    meta["title"] = tc(meta["title"])
+    meta["modified"] = modified_iso(p)
+    meta.setdefault("crumb", meta["h1"])
+    meta["h1"] = tc(meta["h1"])
+    Path(out).write_text(page_html(slug, meta, body), encoding="utf-8")
+    print(f"rendered {slug} → {out}")
+
+
 def main():
     if len(sys.argv) == 3 and sys.argv[1] == "--check":
         return check_page(sys.argv[2])
+    if len(sys.argv) == 4 and sys.argv[1] == "--render":
+        return render_page(sys.argv[2], sys.argv[3])
     if OUT.exists():
         shutil.rmtree(OUT)
     OUT.mkdir()
@@ -936,6 +1039,7 @@ def main():
         slug = p.relative_to(SRC / "pages").with_suffix("").as_posix()
         meta, body = parse(p)
         meta["title"] = tc(meta["title"])
+        meta["modified"] = modified_iso(p)
         meta.setdefault("crumb", meta["h1"])
         meta["h1"] = tc(meta["h1"])
         if meta.get("offer"):
@@ -977,6 +1081,8 @@ def main():
 
     # Cloudflare (Workers static assets): кэш и заголовки безопасности
     (OUT / "_headers").write_text(
+        "https://:version.:subdomain.workers.dev/*\n"
+        "  X-Robots-Tag: noindex\n"
         "/*\n"
         "  X-Content-Type-Options: nosniff\n"
         "  Referrer-Policy: strict-origin-when-cross-origin\n"

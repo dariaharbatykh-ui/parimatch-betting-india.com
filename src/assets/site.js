@@ -4,13 +4,19 @@
   var scrim = document.querySelector('.scrim');
   var burger = document.querySelector('.burger');
 
+  // Фон под открытым меню недоступен (inert), фокус уходит в меню и возвращается на кнопку при закрытии
+  var background = document.querySelectorAll('.topbar, main, .site-footer, .sticky-cta, .skip');
   function setOpen(open) {
+    if (body.classList.contains('menu-open') === open) return;
     body.classList.toggle('menu-open', open);
     if (scrim) scrim.hidden = !open;
     if (burger) burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+    background.forEach(function (el) { el.inert = open; });
     if (open && drawer) {
       var first = drawer.querySelector('a, button');
       if (first) first.focus({ preventScroll: true });
+    } else if (burger) {
+      burger.focus({ preventScroll: true });
     }
   }
 
@@ -21,8 +27,7 @@
 
   // Betting и Casino: пункты-хабы с href="#", открывают подменю
   document.querySelectorAll('.sub-toggle').forEach(function (t) {
-    t.addEventListener('click', function (e) {
-      e.preventDefault();
+    t.addEventListener('click', function () {
       var li = t.parentElement;
       var open = !li.classList.contains('open');
       li.parentElement.querySelectorAll('.has-sub.open').forEach(function (o) {
@@ -42,13 +47,13 @@
   });
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') {
-      setOpen(false);
+      if (body.classList.contains('menu-open')) setOpen(false);
       document.querySelectorAll('.has-sub.open').forEach(function (o) { o.classList.remove('open'); });
     }
   });
   if (drawer) drawer.addEventListener('click', function (e) {
     var a = e.target.closest('a');
-    if (a && !a.classList.contains('sub-toggle')) setOpen(false);
+    if (a) setOpen(false);
   });
 
   // Подсветка активного таба при прокрутке
