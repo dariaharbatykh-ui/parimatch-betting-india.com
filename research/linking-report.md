@@ -199,13 +199,31 @@
 - **parimatch customer care number, parimatch contact number, parimatch helpline number india, parimatch number** — сайт не публикует телефоны поддержки, контекст противоречит (правило 10).
 - **parimatch promo code today, parimatch link** — в текстах нет подходящих фраз без переписывания.
 
-## Существующие ссылки, нарушающие правила 8 и 9 (не менялись по правилу 12)
+## Дубли ссылок (правило 8) — исправлено 21.10.2026
 
-- `/registration/`: по несколько ссылок на `/login/`
-- `/support/`: по несколько ссылок на `/withdrawal/`
-- `/contacts/`: ссылки на `/deposit/`, `/withdrawal/`, `/verification/` внутри таблицы.
-- `/login/`: ссылка на `/verification/` внутри таблицы или вопроса FAQ.
-- `/support/`: ссылки на `/withdrawal/` и `/registration/` внутри таблицы.
-- `/responsible-gambling/` получает ссылки почти со всех страниц (27) — это старые ссылки из напоминаний об ответственной игре.
+На каждой странице оставлена одна ссылка на один URL. Где на тот же URL вела карточка, осталась карточка, а ссылка в тексте или таблице снята (текст анкора не менялся). Где обе ссылки были в тексте, осталась первая.
 
-Если нужно строго по правилам 8 и 9, эти старые ссылки можно убрать или перенести — скажите, сделаю.
+| Страница | URL | Снятая ссылка |
+|---|---|---|
+| `/registration/` | `/login/` | «Parimatch login page» (Common Registration Problems) |
+| `/registration/` | `/app/` | «Parimatch app page» (осталась карточка Step 3) |
+| `/support/` | `/withdrawal/` | «Withdrawal guide» ×2 в таблице Help Centre Articles (осталась карточка) |
+| `/support/` | `/registration/` | «Registration guide» в таблице (осталась карточка) |
+| `/support/` | `/app/` | «App guide» в таблице (осталась карточка) |
+| `/support/` | `/login/` | «Parimatch login page» (осталась карточка) |
+| `/support/` | `/deposit/` | «Parimatch deposit guide» (осталась карточка) |
+| `/support/` | `/verification/` | «verification page» (осталась карточка) |
+| `/login/` | `/verification/` | «account verification» в таблице (осталась карточка) |
+| `/verification/` | `/withdrawal/` | «Parimatch withdrawal guide» (осталась карточка) |
+| `/crash-games/` | `/aviator/` | «Parimatch Aviator guide» (осталась карточка) |
+| 404 | `/` | карточка Home (осталась кнопка Go to the Home Page) |
+
+## Старые ссылки в таблицах (правило 9) — не менялись
+
+- `/contacts/`: `/deposit/` («Parimatch deposit guide»)
+- `/contacts/`: `/withdrawal/` («Parimatch withdrawal guide»)
+- `/contacts/`: `/verification/` («Parimatch verification guide»)
+- `/contacts/`: `/login/` («Parimatch login help»)
+- `/support/`: `/mobile-version/` («mobile version guide»)
+
+`/responsible-gambling/` получает ссылки почти со всех страниц (27) — это старые ссылки из напоминаний об ответственной игре; оставлены по правилу 12.
