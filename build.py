@@ -154,8 +154,7 @@ SHOT_ALT = {
     "adult-notice": "Notice that the website is intended for users aged 18 and older only",
     "ph-sports": "Parimatch cricket betting on a phone",
     "ph-live": "Parimatch live casino lobby on a phone",
-    "ph-football": "Parimatch football betting on a phone",
-    "ph-tennis": "Parimatch tennis betting on a phone",
+    "ph-lobby": "Parimatch sports lobby on a phone with top events",
     "ph-esports": "Parimatch esports section on a phone",
     "ph-cs2": "Counter-Strike 2 matches with odds on a phone",
     "ph-dota2": "Dota 2 matches with odds on a phone",
@@ -173,7 +172,7 @@ SHOT_ALT = {
 HERO_ART = {
     "index": {"layout": "browser", "main": "home-desktop", "a": "promo-sports-welcome", "b": "home-cricket-cards"},
     "app": {"layout": "phone", "phones": ["ph-sports", "ph-live"], "platforms": True},
-    "mobile-version": {"layout": "phone", "phones": ["ph-football", "ph-esports"], "chip": "No download needed"},
+    "mobile-version": {"layout": "phone", "phones": ["ph-lobby", "ph-dota2"], "chip": "No download needed"},
     "registration": {"layout": "form", "img": "signup", "button": "Sign Up"},
     "login": {"layout": "form", "img": "login-form", "button": "Log In"},
     "verification": {"layout": "illus", "kind": "verification"},
@@ -183,10 +182,10 @@ HERO_ART = {
     "cricket": {"layout": "panel", "img": "odds-cricket", "card": "promo-cricket-freebet"},
     "football": {"layout": "panel", "img": "odds-football", "card": "promo-football-rating"},
     "kabaddi": {"layout": "illus", "kind": "kabaddi", "strip": "sports-bar", "chip": "Pro Kabaddi League"},
-    "tennis": {"layout": "panel", "img": "odds-tennis", "phone": "ph-tennis", "chip": "Grand Slams · ATP · WTA"},
-    "esports": {"layout": "panel", "img": "esports-banner", "strip": "esports-sports-bar", "chip": "LoL · Valorant · Dota 2 · CS2"},
+    "tennis": {"layout": "panel", "img": "odds-tennis", "chip": "Grand Slams · ATP · WTA"},
+    "esports": {"layout": "panel", "img": "esports-banner", "phone": "ph-esports", "chip": "LoL · Valorant · Dota 2 · CS2"},
     "esports/cs2": {"layout": "panel", "img": "odds-cs2", "phone": "ph-cs2", "chip": "CS2 Majors · IEM · BLAST"},
-    "esports/dota2": {"layout": "panel", "img": "odds-dota2", "phone": "ph-dota2", "chip": "The International · ESL One"},
+    "esports/dota2": {"layout": "panel", "img": "odds-dota2", "chip": "The International · ESL One"},
     "slots": {"layout": "fan", "tiles": ["tile-le-bandit", "tile-sun-of-egypt", "tile-coin-strike", "tile-magic-apple", "tile-royal-express"], "card": "promo-slots-welcome"},
     "live-casino": {"layout": "fan", "tiles": ["tile-luxe-blackjack", "tile-lightning-roulette", "tile-crazy-time", "tile-monopoly-live", "tile-funky-time"], "card": "promo-live-welcome"},
     "aviator": {"layout": "tile", "img": "tile-aviator", "card": "promo-instant-welcome", "chip": "Spribe · RTP 97%"},
@@ -452,17 +451,42 @@ def slugify(text):
     return re.sub(r"[^a-z0-9]+", "-", t).strip("-")
 
 
+LEAD_LINK = re.compile(r"\[([^\]]+)\]\((/[^)\s]*)\)")
+
+
+def lead_html(text):
+    return LEAD_LINK.sub(lambda m: f'<a href="{m.group(2)}">{m.group(1)}</a>', esc(text))
+
+
+def lead_plain(text):
+    return LEAD_LINK.sub(lambda m: m.group(1), text)
+
+
 def strip_tags(s):
     return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", s)).strip()
 
 
 def game_img(name, prov):
-    """<img> превью игры, если файл есть в src/assets/img/games/<slug>.webp."""
+    """Превью игры из src/assets/img/games/<slug>.jpg (или .webp). Вертикальные превью — целиком в плитке 2:3,
+    горизонтальные — целиком по центру на размытом фоне из той же картинки (без обрезки)."""
     slug = slugify(name)
-    if not (SRC / "assets" / "img" / "games" / f"{slug}.webp").exists():
+    for ext in ("jpg", "webp"):
+        path = SRC / "assets" / "img" / "games" / f"{slug}.{ext}"
+        if path.exists():
+            break
+    else:
         return ""
-    return (f'<img src="/assets/img/games/{slug}.webp" width="180" height="236" loading="lazy" decoding="async" '
-            f'alt="{esc(name)} by {esc(prov)} at Parimatch">')
+    alt = esc(f"{name} by {prov}") if prov and "game" not in prov.lower() else esc(name)
+    if ext == "jpg":
+        w, h = jpeg_size(path)
+    else:
+        w, h = 360, 540
+    src = f"/assets/img/games/{slug}.{ext}"
+    main = f'<img src="{src}" width="{w}" height="{h}" loading="lazy" decoding="async" alt="{alt}">'
+    if h / w >= 1.3:
+        return main
+    return (f'<img class="art-bg" src="{src}" width="{w}" height="{h}" loading="lazy" decoding="async" alt="">'
+            + main.replace("<img ", '<img class="art-fit" ', 1))
 
 
 # Иконки у заголовков H2 по смыслу (порядок важен: сначала частные случаи)
@@ -754,7 +778,8 @@ def _page_html(slug, meta, body):
         btns = [cta("Download the App", "", "app"), cta("Sign Up at Parimatch", "ghost", "reg")] if slug == "app" else [reg_btn, app_btn]
         actions = '<div class="hero-actions">' + "".join(btns) + "</div>"
 
-    lead = f'<p class="lead">{esc(meta["lead"])}</p>' if meta.get("lead") else ""
+    # В lead допускается одна ссылка (на главную) в виде [анкор](/url)
+    lead = f'<p class="lead">{lead_html(meta["lead"])}</p>' if meta.get("lead") else ""
     hero = f'''<section class="hero{' hero-legal' if kind == 'legal' else ''}">
   <div class="wrap">
     {crumbs}
@@ -874,7 +899,7 @@ def check_page(slug):
         errors.append(f"{slug}: нет FAQ")
     if kind != "legal" and not meta.get("lead"):
         errors.append(f"{slug}: нет lead")
-    errors += text_checks(slug, expand(body) + " " + meta.get("lead", ""))
+    errors += text_checks(slug, expand(body) + " " + lead_plain(meta.get("lead", "")))
     known = {url_of(x.relative_to(SRC / "pages").with_suffix("").as_posix()) for x in (SRC / "pages").rglob("*.html")}
     planned = {"/", "/app/", "/mobile-version/", "/registration/", "/login/", "/verification/", "/bonus/", "/deposit/",
                "/withdrawal/", "/cricket/", "/football/", "/kabaddi/", "/tennis/", "/esports/", "/esports/cs2/",
@@ -925,7 +950,7 @@ def main():
         if d in descs:
             errors.append(f"{slug}: description дублирует {descs[d]}")
         titles[t], descs[d] = slug, slug
-        errors += text_checks(slug, expand(body) + " " + meta.get("lead", ""))
+        errors += text_checks(slug, expand(body) + " " + lead_plain(meta.get("lead", "")))
         if meta.get("type", "commercial") == "commercial" and "<details>" not in body:
             errors.append(f"{slug}: нет FAQ")
 
