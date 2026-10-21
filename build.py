@@ -120,6 +120,110 @@ GAME_COLORS = [
 ]
 
 
+# Картинки первого экрана: фрагменты скриншотов индийской версии Parimatch (src/assets/img/shots/).
+# main — большой скриншот в рамке браузера; a, b — карточки поверх (tall = вертикальная).
+SHOT_ALT = {
+    "home-desktop": "Parimatch India home page with Hot Matches, the crypto bonus banner and the games strip",
+    "home-cricket-cards": "Live cricket matches with odds in the Parimatch Hot Matches section",
+    "home-football-card": "UEFA Champions League match with odds at Parimatch",
+    "home-hot-matches": "Hot Matches with live cricket and football odds at Parimatch",
+    "home-games": "Aviator, JetX, Aviatrix, Andar Bahar, Money Time and other games in the Parimatch lobby",
+    "home-sidebar-sports": "Parimatch sports menu with cricket, football, tennis and horse racing",
+    "home-sidebar-popular": "Popular cricket and football events in the Parimatch menu",
+    "home-pills": "Parimatch quick sections: Promo, Crypto, App, All Live, EPL, Virtual Cricket and E-Football",
+    "home-header": "Log In and Sign Up buttons on Parimatch",
+    "signup": "Parimatch sign-up form with Google, Apple, phone and e-mail options and the sports bonus selector",
+    "support-panel": "Parimatch Customer Support panel with Online Chat and FAQ",
+    "support-chat": "Parimatch support chat with help articles about withdrawals and sign-up",
+    "promo-cricket-freebet": "Bet on Cricket promotion with a 50% free bet",
+    "promo-football-rating": "Football rating promotion with a ₹3,00,000 prize pool",
+    "promo-coin-strike": "60 free spins in Coin Strike: Hold and Win by Playson",
+    "promo-instant-75": "75% Instant Games bonus card",
+    "promo-money-time": "60 free chips in Money Time by Pragmatic Play",
+    "promo-code": "Promo code section in Parimatch promotions",
+    "promo-sports-welcome": "150% Sports Welcome Bonus for INR, USDT and USDC",
+    "promo-pwa": "PWA Welcome 400% bonus pack with up to ₹1,80,000 in rewards",
+    "promo-daily-freebets": "Daily Free Bets promotion card",
+    "promo-crypto-800": "800% Crypto Welcome Bonus card",
+    "promo-slots-welcome": "150% Slots Welcome Bonus for INR, USDT and USDC",
+    "promo-live-welcome": "100% Live Casino Welcome Bonus for INR, USDT and USDC",
+    "promo-instant-welcome": "100% Instant Games Welcome Bonus for INR, USDT and USDC",
+}
+H = "home-desktop"
+HERO_SHOTS = {
+    "index": (H, "promo-sports-welcome", "home-cricket-cards"),
+    "app": (H, "promo-pwa", "home-pills"),
+    "mobile-version": (H, "promo-pwa", "home-pills"),
+    "registration": (H, "signup:tall", "promo-sports-welcome"),
+    "login": (H, "signup:tall", "home-header"),
+    "verification": (H, "support-chat:tall", "promo-sports-welcome"),
+    "bonus": (H, "promo-sports-welcome", "promo-crypto-800"),
+    "deposit": (H, "promo-sports-welcome", "home-header"),
+    "withdrawal": (H, "support-chat:tall", "home-header"),
+    "cricket": (H, "promo-cricket-freebet", "home-cricket-cards"),
+    "football": (H, "promo-football-rating", "home-sidebar-popular:tall"),
+    "kabaddi": (H, "home-sidebar-sports:tall", "promo-daily-freebets"),
+    "tennis": (H, "home-sidebar-sports:tall", "promo-daily-freebets"),
+    "esports": (H, "promo-daily-freebets", "home-pills"),
+    "esports/cs2": (H, "promo-daily-freebets", "home-pills"),
+    "esports/dota2": (H, "promo-daily-freebets", "home-pills"),
+    "slots": (H, "promo-slots-welcome", "home-games"),
+    "live-casino": (H, "promo-live-welcome", "promo-money-time"),
+    "aviator": (H, "promo-instant-welcome", "home-games"),
+    "crash-games": (H, "promo-instant-75", "home-games"),
+    "support": (H, "support-chat:tall", "support-panel"),
+    "affiliate-program": (H, "promo-code", None),
+    "about": (H, "home-hot-matches", None),
+    "contacts": (H, "support-panel", None),
+    "privacy-policy": (H, "home-header", None),
+    "terms-and-conditions": (H, "signup:tall", None),
+    "cookie-policy": (H, "home-header", None),
+    "responsible-gambling": (H, "signup:tall", None),
+}
+
+
+def jpeg_size(path):
+    """(width, height) JPEG без сторонних библиотек: читает маркер SOF."""
+    data = path.read_bytes()
+    i = 2
+    while i < len(data):
+        if data[i] != 0xFF:
+            i += 1
+            continue
+        marker = data[i + 1]
+        if marker in (0xC0, 0xC1, 0xC2, 0xC3, 0xC5, 0xC6, 0xC7, 0xC9, 0xCA, 0xCB, 0xCD, 0xCE, 0xCF):
+            h = int.from_bytes(data[i + 5:i + 7], "big")
+            w = int.from_bytes(data[i + 7:i + 9], "big")
+            return w, h
+        i += 2 + int.from_bytes(data[i + 2:i + 4], "big")
+    raise ValueError(f"{path}: не JPEG")
+
+
+def shot_img(name, cls, priority=False):
+    path = SRC / "assets" / "img" / "shots" / f"{name}.jpg"
+    w, h = jpeg_size(path)
+    load = 'fetchpriority="high"' if priority else 'loading="eager"'
+    return (f'<img class="{cls}" src="/assets/img/shots/{name}.jpg" width="{w}" height="{h}" {load} '
+            f'decoding="async" alt="{esc(SHOT_ALT[name])}">')
+
+
+def hero_shot_html(slug, tag=""):
+    if slug not in HERO_SHOTS:
+        return ""
+    main, a, b = HERO_SHOTS[slug]
+    parts = [f'<div class="shot-main"><span class="shot-bar" aria-hidden="true"><i></i><i></i><i></i></span>'
+             f'{shot_img(main, "", priority=True)}</div>']
+    for pos, item in (("a", a), ("b", b)):
+        if not item:
+            continue
+        name, _, kind = item.partition(":")
+        w, h = jpeg_size(SRC / "assets" / "img" / "shots" / f"{name}.jpg")
+        shape = " tall" if kind == "tall" else (" wide" if w / h > 2.6 else "")
+        parts.append(f'<div class="shot-ov shot-{pos}{shape}">{shot_img(name, "")}</div>')
+    tag_html = f'<p class="shot-tag">{esc(tag)}</p>' if tag else ""
+    return f'<figure class="hero-shot{" has-b" if b else ""}">{"".join(parts)}{tag_html}</figure>'
+
+
 def asset_ver(name):
     """Короткий хэш файла для ?v= — после правки CSS/JS браузеры и Cloudflare берут новую версию."""
     return hashlib.md5((SRC / "assets" / name).read_bytes()).hexdigest()[:8]
@@ -504,16 +608,8 @@ def _page_html(slug, meta, body):
         graph.append(extra)
     ld = json.dumps({"@context": "https://schema.org", "@graph": graph}, ensure_ascii=False)
 
-    hero_side = ""
-    if meta.get("offer"):
-        o = meta["offer"]
-        points = "".join(f"<li>{esc(p)}</li>" for p in o.get("points", []))
-        hero_side = (f'<aside class="offer-card"><span class="tag">{esc(o["tag"])}</span>'
-                     f'<div class="offer-art" aria-hidden="true"><span></span><span></span><span></span></div>'
-                     f'<div class="big">{esc(o["title"])}</div>'
-                     f'{"<ul>" + points + "</ul>" if points else ""}'
-                     f'{cta(o["button"], "", o.get("link", "reg"))}'
-                     f'<p class="fine">18+ · T&amp;Cs apply · Play responsibly</p></aside>')
+    # Первый экран: композиция из скриншотов Parimatch; плашка — бонус страницы (offer.title), если он есть
+    hero_side = hero_shot_html(slug, meta["offer"]["title"] if meta.get("offer") else "")
 
     # Первый экран каждой страницы (и служебных тоже): регистрация + скачать приложение
     actions = ""
