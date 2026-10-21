@@ -120,27 +120,20 @@ GAME_COLORS = [
 ]
 
 
-# Картинки первого экрана: фрагменты скриншотов индийской версии Parimatch (src/assets/img/shots/).
-# main — большой скриншот в рамке браузера; a, b — карточки поверх (tall = вертикальная).
+# Картинки первого экрана (src/assets/img/shots/): фрагменты скриншотов Parimatch. Индийская версия —
+# скриншоты заказчика (home-*, promo-*, signup, support-*); игры, линии и мобильные экраны — англоязычная
+# версия той же платформы, без бонусов и сумм в USDT. Каждая страница — своя композиция (HERO_ART).
 SHOT_ALT = {
     "home-desktop": "Parimatch India home page with Hot Matches, the crypto bonus banner and the games strip",
     "home-cricket-cards": "Live cricket matches with odds in the Parimatch Hot Matches section",
-    "home-football-card": "UEFA Champions League match with odds at Parimatch",
-    "home-hot-matches": "Hot Matches with live cricket and football odds at Parimatch",
-    "home-games": "Aviator, JetX, Aviatrix, Andar Bahar, Money Time and other games in the Parimatch lobby",
-    "home-sidebar-sports": "Parimatch sports menu with cricket, football, tennis and horse racing",
-    "home-sidebar-popular": "Popular cricket and football events in the Parimatch menu",
-    "home-pills": "Parimatch quick sections: Promo, Crypto, App, All Live, EPL, Virtual Cricket and E-Football",
-    "home-header": "Log In and Sign Up buttons on Parimatch",
+    "partners": "Current and former Parimatch partners: Manchester United, Chelsea, UFC, Juventus, LaLiga, Leeds United and others",
     "signup": "Parimatch sign-up form with Google, Apple, phone and e-mail options and the sports bonus selector",
+    "login-form": "Parimatch log-in form with e-mail, phone or username, password and Google sign-in",
     "support-panel": "Parimatch Customer Support panel with Online Chat and FAQ",
     "support-chat": "Parimatch support chat with help articles about withdrawals and sign-up",
     "promo-cricket-freebet": "Bet on Cricket promotion with a 50% free bet",
     "promo-football-rating": "Football rating promotion with a ₹3,00,000 prize pool",
-    "promo-coin-strike": "60 free spins in Coin Strike: Hold and Win by Playson",
     "promo-instant-75": "75% Instant Games bonus card",
-    "promo-money-time": "60 free chips in Money Time by Pragmatic Play",
-    "promo-code": "Promo code section in Parimatch promotions",
     "promo-sports-welcome": "150% Sports Welcome Bonus for INR, USDT and USDC",
     "promo-pwa": "PWA Welcome 400% bonus pack with up to ₹1,80,000 in rewards",
     "promo-daily-freebets": "Daily Free Bets promotion card",
@@ -148,37 +141,64 @@ SHOT_ALT = {
     "promo-slots-welcome": "150% Slots Welcome Bonus for INR, USDT and USDC",
     "promo-live-welcome": "100% Live Casino Welcome Bonus for INR, USDT and USDC",
     "promo-instant-welcome": "100% Instant Games Welcome Bonus for INR, USDT and USDC",
+    "odds-cricket": "Live cricket odds at Parimatch: Test match, ODI Tri-Nation Series and Sheffield Shield",
+    "odds-football": "Football odds at Parimatch for UEFA Champions League matches",
+    "odds-tennis": "Tennis odds at Parimatch for WTA and ATP matches",
+    "odds-cs2": "Counter-Strike 2 matches with live scores and odds at Parimatch",
+    "odds-dota2": "Dota 2 matches with odds at Parimatch",
+    "kabaddi-top": "Kabaddi section in the Parimatch sportsbook",
+    "sports-bar": "Parimatch sports menu with football, esports, tennis, cricket, kabaddi and more",
+    "esports-banner": "Esports section at Parimatch with a League of Legends tournament banner",
+    "esports-sports-bar": "Esports menu at Parimatch with LoL, Valorant, Dota 2 and CS2",
+    "legal-links": "Legal information links at Parimatch: terms, privacy, cookie and responsible gambling policies",
+    "adult-notice": "Notice that the website is intended for users aged 18 and older only",
+    "ph-sports": "Parimatch cricket betting on a phone",
+    "ph-live": "Parimatch live casino lobby on a phone",
+    "ph-football": "Parimatch football betting on a phone",
+    "ph-tennis": "Parimatch tennis betting on a phone",
+    "ph-esports": "Parimatch esports section on a phone",
+    "ph-cs2": "Counter-Strike 2 matches with odds on a phone",
+    "ph-dota2": "Dota 2 matches with odds on a phone",
+    "tile-coin-strike": "Coin Strike: Hold and Win", "tile-le-bandit": "Le Bandit", "tile-magic-apple": "More Magic Apple",
+    "tile-royal-express": "Royal Express: Hold and Win", "tile-sun-of-egypt": "Sun of Egypt 3",
+    "tile-diamonds-power": "Diamonds Power: Hold and Win", "tile-crazy-time": "Crazy Time",
+    "tile-lightning-roulette": "Lightning Roulette", "tile-luxe-blackjack": "Luxe Blackjack 4",
+    "tile-baccarat": "Shangrila Baccarat 5", "tile-monopoly-live": "Monopoly Live", "tile-funky-time": "Funky Time",
+    "tile-lightning-dice": "Lightning Dice", "tile-aviator": "Aviator", "tile-chicken-road": "Chicken Road 2.0",
+    "tile-aviatrix": "Aviatrix", "tile-aero": "Aero", "tile-megablock": "Megablock", "tile-mines": "Mines",
+    "tile-plinko": "Plinko",
 }
-H = "home-desktop"
-HERO_SHOTS = {
-    "index": (H, "promo-sports-welcome", "home-cricket-cards"),
-    "app": (H, "promo-pwa", "home-pills"),
-    "mobile-version": (H, "promo-pwa", "home-pills"),
-    "registration": (H, "signup:tall", "promo-sports-welcome"),
-    "login": (H, "signup:tall", "home-header"),
-    "verification": (H, "support-chat:tall", "promo-sports-welcome"),
-    "bonus": (H, "promo-sports-welcome", "promo-crypto-800"),
-    "deposit": (H, "promo-sports-welcome", "home-header"),
-    "withdrawal": (H, "support-chat:tall", "home-header"),
-    "cricket": (H, "promo-cricket-freebet", "home-cricket-cards"),
-    "football": (H, "promo-football-rating", "home-sidebar-popular:tall"),
-    "kabaddi": (H, "home-sidebar-sports:tall", "promo-daily-freebets"),
-    "tennis": (H, "home-sidebar-sports:tall", "promo-daily-freebets"),
-    "esports": (H, "promo-daily-freebets", "home-pills"),
-    "esports/cs2": (H, "promo-daily-freebets", "home-pills"),
-    "esports/dota2": (H, "promo-daily-freebets", "home-pills"),
-    "slots": (H, "promo-slots-welcome", "home-games"),
-    "live-casino": (H, "promo-live-welcome", "promo-money-time"),
-    "aviator": (H, "promo-instant-welcome", "home-games"),
-    "crash-games": (H, "promo-instant-75", "home-games"),
-    "support": (H, "support-chat:tall", "support-panel"),
-    "affiliate-program": (H, "promo-code", None),
-    "about": (H, "home-hot-matches", None),
-    "contacts": (H, "support-panel", None),
-    "privacy-policy": (H, "home-header", None),
-    "terms-and-conditions": (H, "signup:tall", None),
-    "cookie-policy": (H, "home-header", None),
-    "responsible-gambling": (H, "signup:tall", None),
+
+# layout: browser | phone | form | fan | stack | tile | panel | illus
+HERO_ART = {
+    "index": {"layout": "browser", "main": "home-desktop", "a": "promo-sports-welcome", "b": "home-cricket-cards"},
+    "app": {"layout": "phone", "phones": ["ph-sports", "ph-live"], "platforms": True},
+    "mobile-version": {"layout": "phone", "phones": ["ph-football", "ph-esports"], "chip": "No download needed"},
+    "registration": {"layout": "form", "img": "signup", "button": "Sign Up"},
+    "login": {"layout": "form", "img": "login-form", "button": "Log In"},
+    "verification": {"layout": "illus", "kind": "verification"},
+    "bonus": {"layout": "stack", "cards": ["promo-pwa", "promo-crypto-800", "promo-sports-welcome"]},
+    "deposit": {"layout": "illus", "kind": "deposit"},
+    "withdrawal": {"layout": "illus", "kind": "withdrawal"},
+    "cricket": {"layout": "panel", "img": "odds-cricket", "card": "promo-cricket-freebet"},
+    "football": {"layout": "panel", "img": "odds-football", "card": "promo-football-rating"},
+    "kabaddi": {"layout": "illus", "kind": "kabaddi", "strip": "sports-bar", "chip": "Pro Kabaddi League"},
+    "tennis": {"layout": "panel", "img": "odds-tennis", "phone": "ph-tennis", "chip": "Grand Slams · ATP · WTA"},
+    "esports": {"layout": "panel", "img": "esports-banner", "strip": "esports-sports-bar", "chip": "LoL · Valorant · Dota 2 · CS2"},
+    "esports/cs2": {"layout": "panel", "img": "odds-cs2", "phone": "ph-cs2", "chip": "CS2 Majors · IEM · BLAST"},
+    "esports/dota2": {"layout": "panel", "img": "odds-dota2", "phone": "ph-dota2", "chip": "The International · ESL One"},
+    "slots": {"layout": "fan", "tiles": ["tile-le-bandit", "tile-sun-of-egypt", "tile-coin-strike", "tile-magic-apple", "tile-royal-express"], "card": "promo-slots-welcome"},
+    "live-casino": {"layout": "fan", "tiles": ["tile-luxe-blackjack", "tile-lightning-roulette", "tile-crazy-time", "tile-monopoly-live", "tile-funky-time"], "card": "promo-live-welcome"},
+    "aviator": {"layout": "tile", "img": "tile-aviator", "card": "promo-instant-welcome", "chip": "Spribe · RTP 97%"},
+    "crash-games": {"layout": "fan", "tiles": ["tile-aero", "tile-aviatrix", "tile-aviator", "tile-chicken-road", "tile-megablock"], "card": "promo-instant-75"},
+    "support": {"layout": "panel", "img": "support-panel", "phone": "support-chat"},
+    "affiliate-program": {"layout": "illus", "kind": "affiliate"},
+    "about": {"layout": "illus", "kind": "about", "strip": "partners"},
+    "contacts": {"layout": "illus", "kind": "contacts"},
+    "privacy-policy": {"layout": "illus", "kind": "privacy"},
+    "terms-and-conditions": {"layout": "panel", "img": "legal-links", "strip": "adult-notice"},
+    "cookie-policy": {"layout": "illus", "kind": "cookie"},
+    "responsible-gambling": {"layout": "illus", "kind": "limits"},
 }
 
 
@@ -199,29 +219,144 @@ def jpeg_size(path):
     raise ValueError(f"{path}: не JPEG")
 
 
-def shot_img(name, cls, priority=False):
+def png_size(path):
+    data = path.read_bytes()[:24]
+    return int.from_bytes(data[16:20], "big"), int.from_bytes(data[20:24], "big")
+
+
+def shot_img(name, cls="", priority=False):
     path = SRC / "assets" / "img" / "shots" / f"{name}.jpg"
     w, h = jpeg_size(path)
     load = 'fetchpriority="high"' if priority else 'loading="eager"'
-    return (f'<img class="{cls}" src="/assets/img/shots/{name}.jpg" width="{w}" height="{h}" {load} '
+    c = f' class="{cls}"' if cls else ""
+    return (f'<img{c} src="/assets/img/shots/{name}.jpg" width="{w}" height="{h}" {load} '
             f'decoding="async" alt="{esc(SHOT_ALT[name])}">')
 
 
+def wordmark():
+    w, h = png_size(SRC / "assets" / "img" / "shots" / "pm-logo.png")
+    return (f'<img class="art-logo" src="/assets/img/shots/pm-logo.png" width="{w}" height="{h}" '
+            f'loading="eager" decoding="async" alt="">')
+
+
+ANDROID = ('<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6 9h12v8a1.5 1.5 0 0 1-1.5 1.5H16v2.5a1.25 1.25 0 0 1-2.5 0V18.5h-3v2.5a1.25 1.25 0 0 1-2.5 0V18.5h-.5A1.5 1.5 0 0 1 6 17zm-2.75 0A1.25 1.25 0 0 1 4.5 10.25v5a1.25 1.25 0 0 1-2.5 0v-5A1.25 1.25 0 0 1 3.25 9zm17.5 0A1.25 1.25 0 0 1 22 10.25v5a1.25 1.25 0 0 1-2.5 0v-5A1.25 1.25 0 0 1 20.75 9zM15.6 3.3l1.1-1.6a.35.35 0 1 0-.6-.4l-1.15 1.7A6.6 6.6 0 0 0 12 2.4a6.6 6.6 0 0 0-2.95.6L7.9 1.3a.35.35 0 1 0-.6.4l1.1 1.6A5.4 5.4 0 0 0 6 8h12a5.4 5.4 0 0 0-2.4-4.7zM9.5 6.2a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5zm5 0a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5z"/></svg>')
+APPLE = ('<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16.4 12.6c0-2.6 2.1-3.8 2.2-3.9-1.2-1.8-3.1-2-3.7-2-1.6-.2-3.1.9-3.9.9-.8 0-2-.9-3.4-.9-1.7 0-3.3 1-4.2 2.6-1.8 3.1-.5 7.7 1.3 10.2.9 1.2 1.9 2.6 3.2 2.6 1.3-.1 1.8-.8 3.3-.8 1.6 0 2 .8 3.4.8 1.4 0 2.3-1.3 3.1-2.5 1-1.4 1.4-2.8 1.4-2.9 0 0-2.7-1-2.7-4.1zM13.9 5c.7-.9 1.2-2.1 1.1-3.3-1 0-2.3.7-3 1.6-.7.8-1.3 2-1.1 3.2 1.1.1 2.3-.6 3-1.5z"/></svg>')
+
+
+def illus_html(kind):
+    """Иллюстрации в стиле интерфейса Parimatch для страниц, где без входа в аккаунт скриншот не снять."""
+    def row(label, value, cls=""):
+        return f'<li class="{cls}"><span>{label}</span><b>{value}</b></li>'
+    check = '<i class="ok" aria-hidden="true">✓</i>'
+    if kind == "about":
+        return (f'<div class="ui-card"><p class="ui-title">Parimatch Betting India</p><ul class="ui-rows">'
+                f'{row("Type", "Independent guide")}{row("Guides", "28 pages")}'
+                f'{row("Facts", "Cross-checked sources")}{row("Language", "English")}</ul>'
+                f'<p class="ui-hint">Affiliate links are marked · 18+</p></div>')
+    if kind == "kabaddi":
+        return (f'<div class="ui-card"><p class="ui-title">Kabaddi · Markets</p><ul class="ui-rows">'
+                f'{row("Match winner", "1X2, draw possible")}{row("Total points", "Over / Under")}'
+                f'{row("Handicap", "Point spread")}{row("Top raider", "Player market")}</ul>'
+                f'<p class="ui-btn">Live Betting</p></div>')
+    if kind == "deposit":
+        methods = "".join(f"<span>{m}</span>" for m in ("UPI", "PhonePe", "Paytm", "Google Pay", "USDT"))
+        return (f'<div class="ui-card"><p class="ui-title">Deposit</p><div class="ui-methods">{methods}</div>'
+                f'<p class="ui-label">Amount</p><p class="ui-field">₹ 1,000</p>'
+                f'<p class="ui-hint">From ₹300 · no fee from Parimatch</p><p class="ui-btn">Deposit</p></div>'
+                f'<p class="art-chip">Credited in minutes</p>')
+    if kind == "withdrawal":
+        return (f'<div class="ui-card"><p class="ui-title">Withdraw</p><p class="ui-label">UPI ID</p>'
+                f'<p class="ui-field">name@upi</p><p class="ui-label">Amount</p><p class="ui-field">₹ 5,000</p>'
+                f'<p class="ui-btn">Withdraw</p></div>'
+                f'<div class="ui-toast">{check}<span><b>Request sent</b>UPI: usually 15 min – 24 h</span></div>')
+    if kind == "verification":
+        return (f'<div class="ui-card"><p class="ui-title">Account Confirmation</p><ul class="ui-rows">'
+                f'{row("Aadhaar", check + " Verified", "done")}{row("PAN card", "Upload")}'
+                f'{row("Proof of address", "On request")}{row("Selfie with ID", "On request")}</ul>'
+                f'<p class="ui-btn">Upload Document</p></div><p class="art-chip">Usually within 24 h</p>')
+    if kind == "affiliate":
+        bars = "".join(f'<i style="--h:{h}%"></i>' for h in (34, 48, 41, 62, 58, 76, 88))
+        return (f'<div class="ui-card"><p class="ui-title">Partner Dashboard</p><div class="ui-bars" aria-hidden="true">{bars}</div>'
+                f'<div class="ui-methods"><span>RevShare</span><span>CPA</span><span>Hybrid</span></div>'
+                f'<p class="ui-hint">Tracking links · marketing materials · monthly payouts</p></div>')
+    if kind == "contacts":
+        return (f'<div class="ui-card"><p class="ui-title">Write to the Site</p><p class="ui-label">E-mail</p>'
+                f'<p class="ui-field">contact@parimatch-betting-india.com</p><p class="ui-label">Topics</p>'
+                f'<div class="ui-methods"><span>Content</span><span>Corrections</span><span>Partnership</span></div></div>'
+                f'<div class="ui-toast"><i class="ok" aria-hidden="true">?</i><span><b>Account questions</b>Online Chat in Parimatch</span></div>')
+    if kind == "privacy":
+        return (f'<div class="ui-card"><p class="ui-title">Privacy on This Site</p><ul class="ui-rows">'
+                f'{row("User accounts", "None")}{row("Tracking cookies", "None")}'
+                f'{row("Forms collecting data", "None")}{row("Affiliate links", "Third-party sites")}</ul></div>'
+                f'<p class="art-chip">🔒 Privacy Policy</p>')
+    if kind == "cookie":
+        def tog(label, on, note):
+            return f'<li><span>{label}<span class="ui-sub">{note}</span></span><i class="tog{" on" if on else ""}" aria-hidden="true"></i></li>'
+        return (f'<div class="ui-card"><p class="ui-title">Cookies</p><ul class="ui-rows toggles">'
+                f'{tog("Technical", True, "Hosting and security")}{tog("Analytics", False, "Not used")}'
+                f'{tog("Advertising", False, "Not used")}</ul></div><p class="art-chip">🍪 Cookie Policy</p>')
+    if kind == "limits":
+        def tog(label, on, note):
+            return f'<li><span>{label}<span class="ui-sub">{note}</span></span><i class="tog{" on" if on else ""}" aria-hidden="true"></i></li>'
+        return (f'<div class="ui-card"><p class="ui-title">Limits and Tools</p><ul class="ui-rows toggles">'
+                f'{tog("Deposit limit", True, "Daily, weekly or monthly")}{tog("Session reminder", True, "Time spent in the account")}'
+                f'{tog("Time-out", False, "Short break")}{tog("Self-exclusion", False, "Temporary or permanent")}</ul></div>'
+                f'<p class="art-badge">18+</p>')
+    raise ValueError(kind)
+
+
 def hero_shot_html(slug, tag=""):
-    if slug not in HERO_SHOTS:
+    art = HERO_ART.get(slug)
+    if not art:
         return ""
-    main, a, b = HERO_SHOTS[slug]
-    parts = [f'<div class="shot-main"><span class="shot-bar" aria-hidden="true"><i></i><i></i><i></i></span>'
-             f'{shot_img(main, "", priority=True)}</div>']
-    for pos, item in (("a", a), ("b", b)):
-        if not item:
-            continue
-        name, _, kind = item.partition(":")
-        w, h = jpeg_size(SRC / "assets" / "img" / "shots" / f"{name}.jpg")
-        shape = " tall" if kind == "tall" else (" wide" if w / h > 2.6 else "")
-        parts.append(f'<div class="shot-ov shot-{pos}{shape}">{shot_img(name, "")}</div>')
+    lay = art["layout"]
     tag_html = f'<p class="shot-tag">{esc(tag)}</p>' if tag else ""
-    return f'<figure class="hero-shot{" has-b" if b else ""}">{"".join(parts)}{tag_html}</figure>'
+    chip = f'<p class="art-chip">{esc(art["chip"])}</p>' if art.get("chip") else ""
+    inner = ""
+    if lay == "browser":
+        inner = (f'<div class="shot-main"><span class="shot-bar" aria-hidden="true"><i></i><i></i><i></i></span>'
+                 f'{shot_img(art["main"], priority=True)}</div>')
+        if art.get("a"):
+            inner += f'<div class="shot-ov shot-a">{shot_img(art["a"])}</div>'
+        if art.get("b"):
+            inner += f'<div class="shot-ov shot-b wide">{shot_img(art["b"])}</div>'
+    elif lay == "phone":
+        for i, p in enumerate(art["phones"], 1):
+            inner += f'<div class="art-phone art-phone-{i}"><span class="notch" aria-hidden="true"></span>{shot_img(p, priority=i == 1)}</div>'
+        inner += wordmark()
+        if art.get("platforms"):
+            inner += f'<p class="art-platforms"><span>{ANDROID}Android</span><span>{APPLE}iOS</span></p>'
+    elif lay == "form":
+        inner = (f'<div class="art-form">{shot_img(art["img"], priority=True)}</div>'
+                 f'<p class="art-button">{esc(art["button"])}</p>{wordmark()}')
+    elif lay == "fan":
+        tiles = "".join(f'<div class="art-tile">{shot_img(t, priority=i == 2)}</div>' for i, t in enumerate(art["tiles"]))
+        inner = f'<div class="art-fan">{tiles}</div>'
+        if art.get("card"):
+            inner += f'<div class="art-card">{shot_img(art["card"])}</div>'
+    elif lay == "stack":
+        inner = "".join(f'<div class="art-stack art-stack-{i}">{shot_img(c, priority=i == 3)}</div>'
+                        for i, c in enumerate(art["cards"], 1)) + wordmark()
+    elif lay == "tile":
+        inner = f'<div class="art-big-tile">{shot_img(art["img"], priority=True)}</div>'
+        if art.get("card"):
+            inner += f'<div class="art-card">{shot_img(art["card"])}</div>'
+        inner += wordmark()
+    elif lay == "panel":
+        inner = f'<div class="art-panel">{shot_img(art["img"], priority=True)}</div>'
+        if art.get("strip"):
+            inner += f'<div class="art-strip">{shot_img(art["strip"])}</div>'
+        if art.get("card"):
+            inner += f'<div class="art-card">{shot_img(art["card"])}</div>'
+        if art.get("phone"):
+            inner += f'<div class="art-phone art-phone-side"><span class="notch" aria-hidden="true"></span>{shot_img(art["phone"])}</div>'
+        inner += wordmark()
+    elif lay == "illus":
+        inner = illus_html(art["kind"])
+        if art.get("strip"):
+            inner += f'<div class="art-strip">{shot_img(art["strip"])}</div>'
+        inner += wordmark()
+    return f'<figure class="hero-art2 lay-{lay}">{inner}{chip}{tag_html}</figure>'
 
 
 def asset_ver(name):
@@ -433,7 +568,7 @@ def toc_from(body):
     items = re.findall(r'<h2 id="([^"]+)"(?: data-tab="([^"]+)")?>(.*?)</h2>', body, re.S)
     if len(items) < 3:
         return ""
-    lis = "".join(f'<li><a href="#{i}">{esc(tab or short_label(t))}</a></li>' for i, tab, t in items)
+    lis = "".join(f'<li><a href="#{i}">{esc(html.unescape(tab) if tab else short_label(t))}</a></li>' for i, tab, t in items)
     return f'<nav class="tabs" aria-label="On this page"><ul>{lis}</ul></nav>'
 
 
