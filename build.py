@@ -483,7 +483,7 @@ def game_img(name, prov):
         w, h = 360, 540
     src = f"/assets/img/games/{slug}.{ext}"
     main = f'<img src="{src}" width="{w}" height="{h}" loading="lazy" decoding="async" alt="{alt}">'
-    if h / w >= 1.3:
+    if 1.45 <= h / w <= 1.55:
         return main
     return (f'<img class="art-bg" src="{src}" width="{w}" height="{h}" loading="lazy" decoding="async" alt="">'
             + main.replace("<img ", '<img class="art-fit" ', 1))
