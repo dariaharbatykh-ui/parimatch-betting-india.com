@@ -1,14 +1,23 @@
 # Cloudflare Workers со статическими файлами: весь сайт — папка public/ (собирается build.py).
-# Никогда не *.parimatch-betting-india.com/* — поддомен pbic. (партнёрские ссылки) должен остаться нетронутым.
+# Деплой:  npm run deploy   (= python3 build.py && npx wrangler deploy)
+# worker.js: www → основной домен (301), остальное — статические файлы.
 name = "parimatch-betting-india"
+main = "worker.js"
 compatibility_date = "2026-10-01"
+
+# Тестовый адрес: https://parimatch-betting-india.<аккаунт>.workers.dev (закрыт от индексации в _headers)
 workers_dev = true
-# routes = [
-#   { pattern = "parimatch-betting-india.com/*", zone_name = "parimatch-betting-india.com" },
-#   { pattern = "www.parimatch-betting-india.com/*", zone_name = "parimatch-betting-india.com" },
-# ]
+
+# Только основной домен и www. Никогда не *.parimatch-betting-india.com/* —
+# поддомен pbic.parimatch-betting-india.com (партнёрские ссылки) должен остаться нетронутым.
+routes = [
+  { pattern = "parimatch-betting-india.com/*", zone_name = "parimatch-betting-india.com" },
+  { pattern = "www.parimatch-betting-india.com/*", zone_name = "parimatch-betting-india.com" },
+]
 
 [assets]
 directory = "public"
+binding = "ASSETS"
 not_found_handling = "404-page"
 html_handling = "auto-trailing-slash"
+run_worker_first = true

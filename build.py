@@ -1070,7 +1070,7 @@ def main():
         dest.write_text(out, encoding="utf-8")
         if "noindex" not in meta.get("robots", ""):
             prio = meta.get("priority", "0.5")
-            sitemap.append(f"  <url><loc>{SITE}{url_of(slug)}</loc><lastmod>{UPDATED_ISO}</lastmod><priority>{prio}</priority></url>")
+            sitemap.append(f"  <url><loc>{SITE}{url_of(slug)}</loc><lastmod>{meta.get('modified', UPDATED_ISO)}</lastmod><priority>{prio}</priority></url>")
         print(f"{url_of(slug):30} T({len(t)}) D({len(d)})")
 
     (OUT / "sitemap.xml").write_text(
