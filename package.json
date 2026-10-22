@@ -9,7 +9,7 @@
     "validate": "python3 build.py && html-validate \"public/**/*.html\"",
     "og": "python3 tools/make_og.py",
     "cf": "sh scripts/cf.sh",
-    "login": "sh scripts/cf.sh login",
+    "login": "sh scripts/cf.sh login --callback-host 127.0.0.1",
     "whoami": "sh scripts/cf.sh whoami"
   },
   "devDependencies": {
