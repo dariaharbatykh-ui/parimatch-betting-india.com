@@ -249,7 +249,7 @@ def illus_html(kind):
     check = '<i class="ok" aria-hidden="true">✓</i>'
     if kind == "about":
         return (f'<div class="ui-card"><p class="ui-title">Parimatch Betting India</p><ul class="ui-rows">'
-                f'{row("Type", "Independent guide")}{row("Guides", "28 pages")}'
+                f'{row("Type", "Independent site")}{row("Pages", "28")}'
                 f'{row("Facts", "Cross-checked sources")}{row("Language", "English")}</ul>'
                 f'<p class="ui-hint">Affiliate links are marked · 18+</p></div>')
     if kind == "kabaddi":
@@ -747,10 +747,10 @@ def footer():
     <div class="footer-grid">
       <div class="footer-about">
         {LOGO}
-        <p>An independent English guide to Parimatch for players in India: app, registration, bonuses, payments in rupees, cricket betting and casino games.</p>
+        <p>An independent English site about Parimatch for players in India: app, registration, bonuses, payments in rupees, cricket betting and casino games.</p>
         <div class="badges"><span class="badge badge-y">18+</span><span class="badge">Play Responsibly</span></div>
       </div>
-      <div><h2>Guides</h2><ul>{links(FOOTER_GUIDES)}</ul></div>
+      <div><h2>Getting Started</h2><ul>{links(FOOTER_GUIDES)}</ul></div>
       <div><h2>Betting &amp; Casino</h2><ul>{links(FOOTER_PLAY)}</ul></div>
       <div><h2>Information</h2><ul>{links(FOOTER_INFO)}</ul></div>
       <div><h2>Rules &amp; Policies</h2><ul>{links(FOOTER_LEGAL)}</ul></div>
