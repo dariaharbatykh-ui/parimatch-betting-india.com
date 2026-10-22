@@ -2,3 +2,7 @@
 node_modules/
 public/
 .claude/
+
+# Cloudflare credentials of this project
+.wrangler-home/
+.env.deploy

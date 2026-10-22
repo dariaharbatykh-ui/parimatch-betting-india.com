@@ -2,6 +2,8 @@
 # Деплой:  npm run deploy   (= python3 build.py && npx wrangler deploy)
 # worker.js: www → основной домен (301), остальное — статические файлы.
 name = "parimatch-betting-india"
+# Cloudflare account of this project (aciormdqw-43@get-emailxyz.eu): deploys can only go here
+account_id = "8ce6892c78e47d0f40b5198c27798299"
 main = "worker.js"
 compatibility_date = "2026-10-01"
 
