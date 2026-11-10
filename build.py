@@ -18,9 +18,11 @@ OUT = ROOT / "public"
 
 SITE = "https://parimatch-betting-india.com"
 SITE_NAME = "Parimatch Betting India"
-# Каноническая главная — подпапка /in/ (lang en-IN, canonical на себя); корень / — та же страница
-# с canonical на /in/. Все внутренние ссылки на главную ведут на /in/.
-HOME = "/in/"
+# Канонические адреса — в подпапке /in/ (lang en-IN, canonical на себя). Страницы без подпапки
+# (/, /app/ …) отдаются с тем же содержимым и ответом 200, но canonical ведёт на /in/-версию.
+# Все внутренние ссылки ведут на /in/.
+PREFIX = "/in"
+HOME = PREFIX + "/"
 UPDATED_ISO = "2026-10-20"
 UPDATED_TXT = "20 October 2026"
 # Партнёрские ссылки: регистрация и приложение.
@@ -700,6 +702,18 @@ def url_of(slug):
     return "/" if slug == "index" else f"/{slug}/"
 
 
+def in_url(slug):
+    return PREFIX + url_of(slug)
+
+
+# внутренние ссылки на страницы → /in/…; /assets/ и файлы с расширением не трогаются
+_LOCAL_HREF = re.compile(r'href="/(?!assets/|in/)(?![^"]*\.[A-Za-z0-9]+")')
+
+
+def localize(html):
+    return _LOCAL_HREF.sub(f'href="{HOME}', html)
+
+
 LOGO = (f'<a class="logo" href="{HOME}" aria-label="{SITE_NAME} home">'
         f'<span class="logo-mark" aria-hidden="true">PM</span>'
         f'<span class="logo-txt">Parimatch <span class="logo-sub">Betting India</span></span></a>')
@@ -798,8 +812,8 @@ def crumbs_for(slug, label):
         ppath = SRC / "pages" / f"{parent}.html"
         if ppath.exists():
             pmeta, _ = parse(ppath)
-            trail.append((pmeta.get("crumb", pmeta["h1"]), url_of(parent)))
-    trail.append((label, url_of(slug)))
+            trail.append((pmeta.get("crumb", pmeta["h1"]), in_url(parent)))
+    trail.append((label, in_url(slug)))
     return trail
 
 
@@ -810,16 +824,16 @@ def og_image_path(slug):
 
 
 def page_html(slug, meta, body, variant=None):
-    doc = headings_tc(_page_html(slug, meta, body, variant))
+    doc = localize(headings_tc(_page_html(slug, meta, body, variant)))
     # без пробелов в конце строк и без пустых строк из пробелов
     return "\n".join(line.rstrip() for line in doc.split("\n"))
 
 
 def _page_html(slug, meta, body, variant=None):
     url = url_of(slug)
-    # главная собирается дважды: корень / (canonical на /in/) и /in/ (variant="in", en-IN, canonical на себя)
+    # каждая страница собирается дважды: без подпапки (canonical на /in/…) и в /in/ (variant="in", en-IN, canonical на себя)
     on_in = variant == "in"
-    canonical = SITE + (HOME if slug == "index" else url)
+    canonical = SITE + (url if slug == "404" else in_url(slug))
     kind = meta.get("type", "commercial")
     body = expand(body).replace('href="/"', f'href="{HOME}"')
     body = add_icons(body, headings=kind != "legal")
@@ -903,7 +917,7 @@ def _page_html(slug, meta, body, variant=None):
     robots = meta.get("robots", "index, follow, max-image-preview:large")
     if slug == "404":
         head_links = ""
-    elif slug == "index" and not on_in:
+    elif not on_in:
         head_links = f'<link rel="canonical" href="{canonical}">'
     else:
         head_links = (f'<link rel="canonical" href="{canonical}">\n'
@@ -1036,9 +1050,10 @@ def check_page(slug):
 
 
 def render_page(slug, out):
-    """python3 build.py --render <slug> <file>: собрать одну страницу в файл (для html-validate), public/ не трогается. slug "in" — главная в варианте /in/."""
-    variant = "in" if slug == "in" else None
-    slug = "index" if slug == "in" else slug
+    """python3 build.py --render <slug> <file>: собрать одну страницу в файл (для html-validate), public/ не трогается. slug "in/<slug>" (или "in") — вариант страницы в /in/."""
+    variant = "in" if slug == "in" or slug.startswith("in/") else None
+    if variant:
+        slug = slug[3:] or "index"
     p = SRC / "pages" / f"{slug}.html"
     meta, body = parse(p)
     meta["title"] = tc(meta["title"])
@@ -1095,13 +1110,13 @@ def main():
         dest = OUT / "index.html" if slug == "index" else OUT / slug / "index.html"
         dest.parent.mkdir(parents=True, exist_ok=True)
         dest.write_text(out, encoding="utf-8")
-        if slug == "index":
-            (OUT / HOME.strip("/")).mkdir(parents=True, exist_ok=True)
-            (OUT / HOME.strip("/") / "index.html").write_text(page_html(slug, meta, body, "in"), encoding="utf-8")
+        dest_in = OUT / PREFIX.strip("/") / (dest.relative_to(OUT))
+        dest_in.parent.mkdir(parents=True, exist_ok=True)
+        dest_in.write_text(page_html(slug, meta, body, "in"), encoding="utf-8")
         if "noindex" not in meta.get("robots", ""):
             prio = meta.get("priority", "0.5")
-            # в sitemap только канонические адреса: вместо корня — /in/
-            sitemap.append(f"  <url><loc>{SITE}{HOME if slug == 'index' else url_of(slug)}</loc><lastmod>{meta.get('modified', UPDATED_ISO)}</lastmod><priority>{prio}</priority></url>")
+            # в sitemap только канонические адреса — /in/…
+            sitemap.append(f"  <url><loc>{SITE}{in_url(slug)}</loc><lastmod>{meta.get('modified', UPDATED_ISO)}</lastmod><priority>{prio}</priority></url>")
         print(f"{url_of(slug):30} T({len(t)}) D({len(d)})")
 
     (OUT / "sitemap.xml").write_text(
