@@ -46,6 +46,11 @@ strong { color: var(--text); font-weight: 700; }
 :focus-visible { outline: 2px solid var(--y); outline-offset: 2px; }
 
 /* Логотип */
+.logo { display: inline-flex; align-items: center; gap: 10px; color: #fff; text-decoration: none; font-weight: 800; white-space: nowrap; }
+.logo:hover { color: #fff; }
+.logo-mark { width: 34px; height: 34px; border-radius: var(--r-sm); background: var(--y); color: var(--y-ink); display: grid; place-items: center; font-size: .9rem; font-style: italic; letter-spacing: -.04em; transform: skewX(-8deg); }
+.logo-txt { display: flex; flex-direction: column; line-height: 1.05; font-size: 1.15rem; font-style: italic; text-transform: uppercase; letter-spacing: -.01em; }
+.logo-txt .logo-sub { color: var(--y); font-size: .62rem; font-weight: 800; font-style: normal; letter-spacing: .12em; }
 
 /* Шапка */
 .topbar { position: sticky; top: 0; z-index: 50; height: var(--top); background: var(--bg-0); border-bottom: 1px solid var(--bg-3); }
@@ -81,6 +86,7 @@ strong { color: var(--text); font-weight: 700; }
 }
 @media (max-width: 600px) {
   .top-actions .hide-sm { display: none; }
+  .logo-txt { font-size: 1rem; }
 }
 
 /* Мобильное меню */
@@ -397,6 +403,7 @@ a.card:hover { transform: translateY(-3px); border-color: var(--y); }
 
 
 /* Семантическая разметка: кнопки подменю, плитки без инлайн-стилей, таблицы-карточки на телефоне */
+.logo-txt .logo-sub { display: block; }
 .cta-box .cta-sub { display: block; font-weight: 600; color: var(--text-2); font-size: .86rem; }
 .sub-toggle { font: inherit; border: 0; background: none; cursor: pointer; width: 100%; text-align: left; }
 .main-nav > ul > li > .sub-toggle { display: flex; align-items: center; gap: 6px; padding: 10px; border-radius: var(--r-sm); color: var(--text); font-weight: 700; font-size: .92rem; white-space: nowrap; width: auto; }
@@ -456,8 +463,10 @@ tbody th, tbody td { text-align: left; vertical-align: top; }
 .site-footer .logo { min-height: 44px; }
 .faq summary { min-height: 48px; }
 .drawer-close, .burger { min-width: 44px; min-height: 44px; }
+.logo-txt .logo-sub { font-size: 12px; letter-spacing: .08em; }
 .card .kicker { font-size: .75rem; }
 .ok { font-size: max(12px, 1.9cqw); width: max(18px, 3.2cqw); height: max(18px, 3.2cqw); }
+.logo { min-height: 44px; }
 .btn, .btn-sm { min-height: 44px; }
 .site-footer li a { min-width: 44px; }
 @container (max-width: 520px) {
@@ -468,19 +477,3 @@ tbody th, tbody td { text-align: left; vertical-align: top; }
 .crumbs a { min-width: 44px; }
 .card h4 { margin: 0 0 6px; font-size: 1rem; color: var(--text); line-height: 1.25; font-weight: 700; }
 b { color: var(--text); font-weight: 700; }
-
-
-/* Logo: yellow skewed Manrope wordmark + black-on-yellow "Betting India" bar */
-.logo { display: inline-flex; align-items: center; gap: 12px; min-height: 44px; color: #eef51a; text-decoration: none; white-space: nowrap; line-height: 1; }
-.logo:hover { color: #f6fb5a; }
-.logo-mark { flex: none; display: block; width: 40px; height: 40px; background: none; border-radius: 0; transform: none; }
-.logo .logo-txt { display: inline-flex; flex-direction: column; align-items: stretch; gap: 3px; font-family: var(--font, "Manrope", system-ui, sans-serif); font-size: 27px; font-weight: 800; font-style: normal; line-height: .82; letter-spacing: -.01em; text-transform: uppercase; color: inherit; -webkit-text-stroke: .6px currentColor; transform: skewX(-12deg); }
-.logo .logo-sub { display: block; padding: 3px 0 2px .24em; background: #eef51a; color: #0b0b0b; -webkit-text-stroke: 0; font-size: 12px; font-weight: 800; font-style: normal; line-height: 1; letter-spacing: .24em; text-align: center; }
-.logo:hover .logo-sub { background: #f6fb5a; }
-
-@media (max-width: 600px) {
-  .logo { gap: 10px; }
-  .logo-mark { width: 34px; height: 34px; }
-  .logo .logo-txt { font-size: 23px; -webkit-text-stroke-width: .5px; }
-  .logo .logo-sub { padding-left: .16em; letter-spacing: .16em; }
-}

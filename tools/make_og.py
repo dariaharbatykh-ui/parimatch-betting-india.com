@@ -33,7 +33,7 @@ html,body{{margin:0;width:1200px;height:630px;overflow:hidden;background:#0b0b0b
 .og{{position:relative;width:1200px;height:630px;display:grid;grid-template-columns:560px 580px;gap:20px;align-items:center;padding:0 40px;box-sizing:border-box;
 background:radial-gradient(700px 380px at 90% -10%,rgba(238,245,26,.18),transparent 62%),#0b0b0b}}
 .og h1{{font-size:50px;line-height:1.12;margin:18px 0 0}}
-.og .logo .logo-txt{{font-size:34px}}.og .logo-mark{{width:50px;height:50px}}
+.og .logo{{font-size:1.4rem}}
 .og .hero-art2{{width:580px}}
 .og .bar{{position:absolute;left:0;right:0;bottom:0;height:8px;background:var(--y)}}
 </style></head><body><div class="og"><div>{build.LOGO}<h1>{build.esc(h1)}</h1></div>{art}<span class="bar"></span></div></body></html>''', encoding="utf-8")

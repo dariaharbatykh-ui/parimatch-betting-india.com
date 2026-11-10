@@ -18,6 +18,9 @@ OUT = ROOT / "public"
 
 SITE = "https://parimatch-betting-india.com"
 SITE_NAME = "Parimatch Betting India"
+# Каноническая главная — подпапка /in/ (lang en-IN, canonical на себя); корень / — та же страница
+# с canonical на /in/. Все внутренние ссылки на главную ведут на /in/.
+HOME = "/in/"
 UPDATED_ISO = "2026-10-20"
 UPDATED_TXT = "20 October 2026"
 # Партнёрские ссылки: регистрация и приложение.
@@ -495,7 +498,7 @@ LEAD_LINK = re.compile(r"\[([^\]]+)\]\((/[^)\s]*)\)")
 
 
 def lead_html(text):
-    return LEAD_LINK.sub(lambda m: f'<a href="{m.group(2)}">{m.group(1)}</a>', esc(text))
+    return LEAD_LINK.sub(lambda m: f'<a href="{HOME if m.group(2) == "/" else m.group(2)}">{m.group(1)}</a>', esc(text))
 
 
 def lead_plain(text):
@@ -697,9 +700,9 @@ def url_of(slug):
     return "/" if slug == "index" else f"/{slug}/"
 
 
-LOGO = (f'<a class="logo" href="/" aria-label="{SITE_NAME} home">'
-        '<svg class="logo-mark" viewBox="0 0 64 64" width="36" height="36" aria-hidden="true" focusable="false"><rect width="64" height="64" rx="14" fill="#eef51a"/><path fill="#0b0b0b" fill-rule="evenodd" d="M18.25 12 L45.25 12 L50.76 19 L47.79 33 L39.3 40 L24.3 40 L21.32 54 L9.32 54 Z M28.55 20 L39.05 20 L40.63 22 L38.93 30 L36.5 32 L26 32 Z"/></svg>'
-        '<span class="logo-txt">Parimatch <span class="logo-sub">Betting India</span></span></a>')
+LOGO = (f'<a class="logo" href="{HOME}" aria-label="{SITE_NAME} home">'
+        f'<span class="logo-mark" aria-hidden="true">PM</span>'
+        f'<span class="logo-txt">Parimatch <span class="logo-sub">Betting India</span></span></a>')
 
 
 def nav_html(current, mobile=False):
@@ -788,7 +791,7 @@ def sticky_cta(slug):
 
 
 def crumbs_for(slug, label):
-    trail = [("Home", "/")]
+    trail = [("Home", HOME)]
     parts = slug.split("/")
     if len(parts) > 1:
         parent = "/".join(parts[:-1])
@@ -806,17 +809,19 @@ def og_image_path(slug):
     return f"/assets/img/og/{name if path.exists() else 'default'}.jpg"
 
 
-def page_html(slug, meta, body):
-    doc = headings_tc(_page_html(slug, meta, body))
+def page_html(slug, meta, body, variant=None):
+    doc = headings_tc(_page_html(slug, meta, body, variant))
     # без пробелов в конце строк и без пустых строк из пробелов
     return "\n".join(line.rstrip() for line in doc.split("\n"))
 
 
-def _page_html(slug, meta, body):
+def _page_html(slug, meta, body, variant=None):
     url = url_of(slug)
-    canonical = SITE + url
+    # главная собирается дважды: корень / (canonical на /in/) и /in/ (variant="in", en-IN, canonical на себя)
+    on_in = variant == "in"
+    canonical = SITE + (HOME if slug == "index" else url)
     kind = meta.get("type", "commercial")
-    body = expand(body)
+    body = expand(body).replace('href="/"', f'href="{HOME}"')
     body = add_icons(body, headings=kind != "legal")
 
     crumbs = ""
@@ -896,14 +901,18 @@ def _page_html(slug, meta, body):
                  if slug != "404" else "")
 
     robots = meta.get("robots", "index, follow, max-image-preview:large")
-    head_links = ("" if slug == "404" else
-                  f'<link rel="canonical" href="{canonical}">\n'
-                  f'<link rel="alternate" hreflang="en-IN" href="{canonical}">\n'
-                  f'<link rel="alternate" hreflang="x-default" href="{canonical}">')
+    if slug == "404":
+        head_links = ""
+    elif slug == "index" and not on_in:
+        head_links = f'<link rel="canonical" href="{canonical}">'
+    else:
+        head_links = (f'<link rel="canonical" href="{canonical}">\n'
+                      f'<link rel="alternate" hreflang="en-IN" href="{canonical}">\n'
+                      f'<link rel="alternate" hreflang="x-default" href="{canonical}">')
     og_type = "website" if slug == "index" else "article"
 
     return f'''<!DOCTYPE html>
-<html lang="en">
+<html lang="{'en-IN' if on_in else 'en'}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -926,8 +935,6 @@ def _page_html(slug, meta, body):
 <meta name="twitter:image" content="{SITE}{og_image_path(slug)}">
 <meta name="theme-color" content="#0b0b0b">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
-<link rel="icon" href="/assets/favicon-48.png" sizes="48x48" type="image/png">
-<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <link rel="preload" href="/assets/fonts/manrope-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/assets/style.css?v={asset_ver("style.css")}">
 <script type="application/ld+json">{ld}</script>
@@ -1009,7 +1016,7 @@ def check_page(slug):
         errors.append(f"{slug}: нет lead")
     errors += text_checks(slug, expand(body) + " " + lead_plain(meta.get("lead", "")))
     known = {url_of(x.relative_to(SRC / "pages").with_suffix("").as_posix()) for x in (SRC / "pages").rglob("*.html")}
-    planned = {"/", "/app/", "/mobile-version/", "/registration/", "/login/", "/verification/", "/bonus/", "/deposit/",
+    planned = {"/", HOME, "/app/", "/mobile-version/", "/registration/", "/login/", "/verification/", "/bonus/", "/deposit/",
                "/withdrawal/", "/cricket/", "/football/", "/kabaddi/", "/tennis/", "/esports/", "/esports/cs2/",
                "/esports/dota2/", "/slots/", "/live-casino/", "/aviator/", "/crash-games/", "/support/",
                "/affiliate-program/", "/about/", "/contacts/", "/privacy-policy/", "/terms-and-conditions/",
@@ -1029,14 +1036,16 @@ def check_page(slug):
 
 
 def render_page(slug, out):
-    """python3 build.py --render <slug> <file>: собрать одну страницу в файл (для html-validate), public/ не трогается."""
+    """python3 build.py --render <slug> <file>: собрать одну страницу в файл (для html-validate), public/ не трогается. slug "in" — главная в варианте /in/."""
+    variant = "in" if slug == "in" else None
+    slug = "index" if slug == "in" else slug
     p = SRC / "pages" / f"{slug}.html"
     meta, body = parse(p)
     meta["title"] = tc(meta["title"])
     meta["modified"] = modified_iso(p)
     meta.setdefault("crumb", meta["h1"])
     meta["h1"] = tc(meta["h1"])
-    Path(out).write_text(page_html(slug, meta, body), encoding="utf-8")
+    Path(out).write_text(page_html(slug, meta, body, variant), encoding="utf-8")
     print(f"rendered {slug} → {out}")
 
 
@@ -1086,9 +1095,13 @@ def main():
         dest = OUT / "index.html" if slug == "index" else OUT / slug / "index.html"
         dest.parent.mkdir(parents=True, exist_ok=True)
         dest.write_text(out, encoding="utf-8")
+        if slug == "index":
+            (OUT / HOME.strip("/")).mkdir(parents=True, exist_ok=True)
+            (OUT / HOME.strip("/") / "index.html").write_text(page_html(slug, meta, body, "in"), encoding="utf-8")
         if "noindex" not in meta.get("robots", ""):
             prio = meta.get("priority", "0.5")
-            sitemap.append(f"  <url><loc>{SITE}{url_of(slug)}</loc><lastmod>{meta.get('modified', UPDATED_ISO)}</lastmod><priority>{prio}</priority></url>")
+            # в sitemap только канонические адреса: вместо корня — /in/
+            sitemap.append(f"  <url><loc>{SITE}{HOME if slug == 'index' else url_of(slug)}</loc><lastmod>{meta.get('modified', UPDATED_ISO)}</lastmod><priority>{prio}</priority></url>")
         print(f"{url_of(slug):30} T({len(t)}) D({len(d)})")
 
     (OUT / "sitemap.xml").write_text(
