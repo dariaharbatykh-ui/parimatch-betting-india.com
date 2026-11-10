@@ -285,14 +285,14 @@ def illus_html(kind):
                 f'<div class="ui-toast"><i class="ok" aria-hidden="true">?</i><span><b>Account questions</b>Online Chat in Parimatch</span></div>')
     if kind == "privacy":
         return (f'<div class="ui-card"><p class="ui-title">Privacy on This Site</p><ul class="ui-rows">'
-                f'{row("User accounts", "None")}{row("Tracking cookies", "None")}'
+                f'{row("User accounts", "None")}{row("Ad cookies", "None")}'
                 f'{row("Forms collecting data", "None")}{row("Affiliate links", "Third-party sites")}</ul></div>'
                 f'<p class="art-chip">🔒 Privacy Policy</p>')
     if kind == "cookie":
         def tog(label, on, note):
             return f'<li><span>{label}<span class="ui-sub">{note}</span></span><i class="tog{" on" if on else ""}" aria-hidden="true"></i></li>'
         return (f'<div class="ui-card"><p class="ui-title">Cookies</p><ul class="ui-rows toggles">'
-                f'{tog("Technical", True, "Hosting and security")}{tog("Analytics", False, "Not used")}'
+                f'{tog("Technical", True, "Hosting and security")}{tog("Analytics", True, "Google Tag Manager")}'
                 f'{tog("Advertising", False, "Not used")}</ul></div><p class="art-chip">🍪 Cookie Policy</p>')
     if kind == "limits":
         def tog(label, on, note):
@@ -382,6 +382,20 @@ def modified_iso(path):
 def human_date(iso):
     y, m, d = iso.split("-")
     return f"{int(d)} {_MONTHS[int(m) - 1]} {y}"
+
+
+# Google Tag Manager (контейнер заказчика). Head — как можно выше в <head>, noscript — сразу после <body>.
+GTM_ID = "GTM-53T834KC"
+GTM_HEAD = ("<!-- Google Tag Manager -->\n"
+            "<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});"
+            "var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;"
+            "j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})"
+            f"(window,document,'script','dataLayer','{GTM_ID}');</script>\n"
+            "<!-- End Google Tag Manager -->")
+GTM_BODY = ("<!-- Google Tag Manager (noscript) -->\n"
+            f'<noscript><iframe src="https://www.googletagmanager.com/ns.html?id={GTM_ID}" height="0" width="0" '
+            'style="display:none;visibility:hidden" title="Google Tag Manager"></iframe></noscript>\n'
+            "<!-- End Google Tag Manager (noscript) -->")
 
 
 def asset_ver(name):
@@ -684,8 +698,8 @@ def url_of(slug):
 
 
 LOGO = (f'<a class="logo" href="/" aria-label="{SITE_NAME} home">'
-        f'<span class="logo-mark" aria-hidden="true">PM</span>'
-        f'<span class="logo-txt">Parimatch <span class="logo-sub">Betting India</span></span></a>')
+        '<svg class="logo-mark" viewBox="0 0 64 64" width="36" height="36" aria-hidden="true" focusable="false"><rect width="64" height="64" rx="14" fill="#eef51a"/><path fill="#0b0b0b" fill-rule="evenodd" d="M18.25 12 L45.25 12 L50.76 19 L47.79 33 L39.3 40 L24.3 40 L21.32 54 L9.32 54 Z M28.55 20 L39.05 20 L40.63 22 L38.93 30 L36.5 32 L26 32 Z"/></svg>'
+        '<span class="logo-txt">Parimatch <span class="logo-sub">Betting India</span></span></a>')
 
 
 def nav_html(current, mobile=False):
@@ -893,6 +907,7 @@ def _page_html(slug, meta, body):
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+{GTM_HEAD}
 <title>{esc(meta["title"])}</title>
 <meta name="description" content="{esc(meta["description"])}">
 <meta name="robots" content="{robots}">
@@ -911,11 +926,14 @@ def _page_html(slug, meta, body):
 <meta name="twitter:image" content="{SITE}{og_image_path(slug)}">
 <meta name="theme-color" content="#0b0b0b">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/assets/favicon-48.png" sizes="48x48" type="image/png">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <link rel="preload" href="/assets/fonts/manrope-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/assets/style.css?v={asset_ver("style.css")}">
 <script type="application/ld+json">{ld}</script>
 </head>
 <body>
+{GTM_BODY}
 <a class="skip" href="#main">Skip to content</a>
 {header(url)}
 <main id="main">
